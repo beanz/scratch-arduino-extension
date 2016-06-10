@@ -587,6 +587,7 @@
   var blocks = {
     en: [
       ['h', 'when device is connected', 'whenConnected'],
+      [' ', 'set pixel %n to red %n, green %n, blue %n', 'setPixel', 0, 255, 0, 0],
       [' ', 'connect %m.hwOut to pin %n', 'connectHW', 'led A', 3],
       [' ', 'connect %m.hwIn to analog %n', 'connectHW', 'rotation knob', 0],
       ['-'],
