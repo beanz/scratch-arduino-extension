@@ -27,7 +27,13 @@
     ANALOG_MAPPING_QUERY = 0x69,
     ANALOG_MAPPING_RESPONSE = 0x6A,
     CAPABILITY_QUERY = 0x6B,
-    CAPABILITY_RESPONSE = 0x6C;
+    CAPABILITY_RESPONSE = 0x6C,
+    CP_COMMAND = 0x40;
+
+  var CP_PIXEL_SET = 0x10,
+      CP_PIXEL_SHOW = 0x11,
+      CP_TONE = 0x20,
+      CP_NO_TONE = 0x21;
 
   var INPUT = 0x00,
     OUTPUT = 0x01,
@@ -342,6 +348,29 @@
     device.send(msg.buffer);
   }
 
+  function setPixel(pixel, red, green, blue) {
+    pixel &= 0x7f;
+    red &= 0xff;
+    green &= 0xff;
+    blue &= 0xff;
+    var msg = new Uint8Array([
+        CP_COMMAND,
+        CP_PIXEL_SET,
+        red >> 1,
+        ((red & 0x01) << 6) | (green >> 2),
+        ((green & 0x03) << 5) | (blue >> 3),
+        (blue & 0x07) << 4
+    ]);
+    device.send(msg.buffer);
+  }
+
+  function showPixels() {
+    var msg = new Uint8Array([
+        CP_COMMAND,
+        CP_PIXEL_SHOW]);
+    device.send(msg.buffer);
+  }
+
   ext.whenConnected = function() {
     if (notifyConnection) return true;
     return false;
@@ -409,6 +438,19 @@
     else if (deg > 180) deg = 180;
     rotateServo(hw.pin, deg);
     hw.val = deg;
+  };
+
+  ext.setPixel = function(pixel, red, green, blue) {
+    if (pixel < 0) pixel = 0;
+    else if (pixel > 9) pixel = 9;
+    if (red < 0) red = 1;
+    else if (red > 255) red = 255;
+    if (green < 0) green = 1;
+    else if (green > 255) green = 255;
+    if (blue < 0) blue = 1;
+    else if (blue > 255) blue = 255;
+    setPixel(pixel, red, green, blue);
+    showPixels();
   };
 
   ext.setLED = function(led, val) {
@@ -571,6 +613,8 @@
       ['r', 'read analog %n', 'analogRead', 0],
       ['-'],
       ['r', 'map %n from %n %n to %n %n', 'mapValues', 50, 0, 100, -240, 240]
+      ['-'],
+      [' ', 'set pixel %n to red %n, green %n, blue %n', 'setPixel', 0, 255, 0, 0],
     ],
     de: [
       ['h', 'Wenn Arduino verbunden ist', 'whenConnected'],
