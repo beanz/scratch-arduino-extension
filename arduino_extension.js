@@ -354,20 +354,24 @@
     green &= 0xff;
     blue &= 0xff;
     var msg = new Uint8Array([
+        START_SYSEX,
         CP_COMMAND,
         CP_PIXEL_SET,
         red >> 1,
         ((red & 0x01) << 6) | (green >> 2),
         ((green & 0x03) << 5) | (blue >> 3),
-        (blue & 0x07) << 4
+        (blue & 0x07) << 4,
+        END_SYSEX
     ]);
     device.send(msg.buffer);
   }
 
   function showPixels() {
     var msg = new Uint8Array([
+        START_SYSEX,
         CP_COMMAND,
-        CP_PIXEL_SHOW]);
+        CP_PIXEL_SHOW,
+        END_SYSEX]);
     device.send(msg.buffer);
   }
 
