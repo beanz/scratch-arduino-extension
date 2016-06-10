@@ -32,6 +32,8 @@
 
   var CP_PIXEL_SET = 0x10,
       CP_PIXEL_SHOW = 0x11,
+      CP_PIXEL_CLEAR = 0x12,
+      CP_PIXEL_BRIGHTNESS = 0x13,
       CP_TONE = 0x20,
       CP_NO_TONE = 0x21;
 
@@ -385,6 +387,17 @@
     device.send(msg.buffer);
   }
 
+  function setBrightness(brightness) {
+    var msg = new Uint8Array([
+        START_SYSEX,
+        CP_COMMAND,
+        CP_PIXEL_BRIGHTNESS,
+        brightness & 0x7F,
+        END_SYSEX]);
+    console.log("Sending setBrightness: " + brightness + " " + ua2hex(msg));
+    device.send(msg.buffer);
+  }
+
   ext.whenConnected = function() {
     if (notifyConnection) return true;
     return false;
@@ -463,6 +476,7 @@
     else if (green > 255) green = 255;
     if (blue < 0) blue = 1;
     else if (blue > 255) blue = 255;
+    setBrightness(50);
     setPixel(pixel, red, green, blue);
     showPixels();
   };
