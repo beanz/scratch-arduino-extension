@@ -1130,6 +1130,6 @@
     url: 'http://beanz.github.io/scratch-arduino-extension'
   };
 
-  ScratchExtensions.register('Arduino', descriptor, ext, {type:'serial'});
+  ScratchExtensions.register('Circuit Playground', descriptor, ext, {type:'serial'});
 
 })({});
