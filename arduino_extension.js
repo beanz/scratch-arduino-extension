@@ -348,6 +348,14 @@
     device.send(msg.buffer);
   }
 
+  function ua2hex(ua) {
+    var h = '';
+    for (var i = 0; i < ua.length; i++) {
+        h += "\\0x" + ua[i].toString(16);
+    }
+    return h;
+  }
+
   function setPixel(pixel, red, green, blue) {
     pixel &= 0x7f;
     red &= 0xff;
@@ -363,6 +371,7 @@
         (blue & 0x07) << 4,
         END_SYSEX
     ]);
+    console.log("Sending setPixel: " + ua2hex(msg));
     device.send(msg.buffer);
   }
 
@@ -372,6 +381,7 @@
         CP_COMMAND,
         CP_PIXEL_SHOW,
         END_SYSEX]);
+    console.log("Sending setPixel: " + ua2hex(msg));
     device.send(msg.buffer);
   }
 
