@@ -388,13 +388,45 @@
   }
 
   function setBrightness(brightness) {
+    if (brightness < 0) brightness = 0;
+    else if (brightness > 100) brightness = 100;
     var msg = new Uint8Array([
         START_SYSEX,
         CP_COMMAND,
         CP_PIXEL_BRIGHTNESS,
-        brightness & 0x7F,
+        brightness & 0x7f,
         END_SYSEX]);
     console.log("Sending setBrightness: " + brightness + " " + ua2hex(msg));
+    device.send(msg.buffer);
+  }
+
+  function tone(hz, duration) {
+    // Pack 14-bits into 2 7-bit bytes.
+    hz &= 0x3FFF;
+    f1 = hz & 0x7F;
+    f2 = hz >> 7;
+    // Again pack 14-bits into 2 7-bit bytes.
+    duration &= 0x3FFF;
+    d1 = duration & 0x7F;
+    d2 = duration >> 7;
+    var msg = new Uint8Array([
+        START_SYSEX,
+        CP_COMMAND,
+        CP_TONE,
+        f1, f2,
+        d1, d2,
+        END_SYSEX]);
+    console.log("Sending tone: " + hz + " " + duration + " " + ua2hex(msg));
+    device.send(msg.buffer);
+  }
+
+  function noTone() {
+    var msg = new Uint8Array([
+        START_SYSEX,
+        CP_COMMAND,
+        CP_NO_TONE,
+        END_SYSEX]);
+    console.log("Sending no tone: " + ua2hex(msg));
     device.send(msg.buffer);
   }
 
@@ -470,15 +502,24 @@
   ext.setPixel = function(pixel, red, green, blue) {
     if (pixel < 0) pixel = 0;
     else if (pixel > 9) pixel = 9;
-    if (red < 0) red = 1;
+    if (red < 0) red = 0;
     else if (red > 255) red = 255;
-    if (green < 0) green = 1;
+    if (green < 0) green = 0;
     else if (green > 255) green = 255;
-    if (blue < 0) blue = 1;
+    if (blue < 0) blue = 0;
     else if (blue > 255) blue = 255;
     setBrightness(50);
     setPixel(pixel, red, green, blue);
     showPixels();
+  };
+
+  ext.tone = function(hz, duration) {
+    if (duration < 0) duration = 0;
+    tone(hz, duration);
+  };
+
+  ext.setNoTone = function() {
+    noTone();
   };
 
   ext.setLED = function(led, val) {
@@ -616,6 +657,8 @@
     en: [
       ['h', 'when device is connected', 'whenConnected'],
       [' ', 'set pixel %n to red %n, green %n, blue %n', 'setPixel', 0, 255, 0, 0],
+      [' ', 'play tone frequency %n for %n ms', 'tone', 262, 500],
+      [' ', 'stop tone', 'noTone'],
       [' ', 'connect %m.hwOut to pin %n', 'connectHW', 'led A', 3],
       [' ', 'connect %m.hwIn to analog %n', 'connectHW', 'rotation knob', 0],
       ['-'],
